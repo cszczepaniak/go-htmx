@@ -1,5 +1,25 @@
 package main
 
-templ hello(name string) {
-	<div>Hello, { name }</div>
+templ shell() {
+	<html>
+	<script src="https://unpkg.com/htmx.org@2.0.1"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
+	<script src="https://unpkg.com/htmx-ext-sse@2.2.1/sse.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind.min.css">
+	@body()
+	</html>
+}
+
+templ body() {
+	<button class="bg-blue-300" hx-post="/clicked" hx-target="#content">Click Me</button>
+	<div id="content">Placeholder</div>
+	<div hx-ext="sse" sse-connect="/events" sse-swap="update"></div>
+}
+
+templ list(items []string) {
+	<ul class="flex flex-col space-y-2">
+	for _, item := range items {
+		<li class="text-xl">{ item }</li>
+	}
+	</ul>
 }

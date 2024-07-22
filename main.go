@@ -23,18 +23,25 @@ func main() {
 		hdr := w.Header()
 		hdr.Set("Content-Type", "text/event-stream")
 		hdr.Set("Cache-Control", "no-cache")
+		hdr.Set("Connection", "keep-alive")
 
 		items := []string{"a", "b", "c", "d", "e", "f"}
 
 		t := time.NewTicker(time.Second)
-		for range t.C {
-			rand.Shuffle(len(items), func(i, j int) {
-				items[i], items[j] = items[j], items[i]
-			})
-			fmt.Fprintln(w, "event: update")
-			fmt.Fprint(w, "data: ")
-			list(items).Render(context.Background(), w)
-			fmt.Fprint(w, "\n\n")
+		for {
+			select {
+			case <-r.Context().Done():
+				fmt.Println("browser connection terminated")
+				return
+			case <-t.C:
+				rand.Shuffle(len(items), func(i, j int) {
+					items[i], items[j] = items[j], items[i]
+				})
+				fmt.Fprintln(w, "event: update")
+				fmt.Fprint(w, "data: ")
+				list(items).Render(context.Background(), w)
+				fmt.Fprint(w, "\n\n")
+			}
 		}
 	}))
 

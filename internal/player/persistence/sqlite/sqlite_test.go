@@ -6,7 +6,6 @@ import (
 
 	"github.com/cszczepaniak/go-htmx/internal/player/model"
 	"github.com/cszczepaniak/go-htmx/internal/sql"
-	"github.com/google/uuid"
 	"github.com/shoenig/test"
 )
 
@@ -19,30 +18,30 @@ func TestPlayers(t *testing.T) {
 	p := NewSQLitePlayerPersistence(db)
 	test.NoError(t, p.Init(ctx))
 
-	id1 := uuid.NewString()
-	id2 := uuid.NewString()
+	p1, err := p.Insert(ctx, "spongebob", "squarepants")
+	test.NoError(t, err)
 
-	test.NoError(t, p.Insert(ctx, id1, "spongebob", "squarepants"))
-	test.NoError(t, p.Insert(ctx, id2, "patrick", "star"))
+	p2, err := p.Insert(ctx, "patrick", "star")
+	test.NoError(t, err)
 
-	p1, err := p.Get(ctx, id1)
+	p1, err = p.Get(ctx, p1.ID)
 	test.NoError(t, err)
 	test.Eq(
 		t,
 		model.Player{
-			ID:        id1,
+			ID:        p1.ID,
 			FirstName: "spongebob",
 			LastName:  "squarepants",
 		},
 		p1,
 	)
 
-	p2, err := p.Get(ctx, id2)
+	p2, err = p.Get(ctx, p2.ID)
 	test.NoError(t, err)
 	test.Eq(
 		t,
 		model.Player{
-			ID:        id2,
+			ID:        p2.ID,
 			FirstName: "patrick",
 			LastName:  "star",
 		},

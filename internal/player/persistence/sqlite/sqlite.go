@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/cszczepaniak/go-htmx/internal/player/model"
+	"github.com/google/uuid"
 )
 
 type persistence struct {
@@ -29,13 +30,23 @@ func (p persistence) Init(ctx context.Context) error {
 	return err
 }
 
-func (p persistence) Insert(ctx context.Context, id, firstName, lastName string) error {
+func (p persistence) Insert(ctx context.Context, firstName, lastName string) (model.Player, error) {
+	player := model.Player{
+		ID:        uuid.NewString(),
+		FirstName: firstName,
+		LastName:  lastName,
+	}
+
 	_, err := p.db.ExecContext(
 		ctx,
 		`INSERT INTO Players (ID, FirstName, LastName) VALUES (?, ?, ?)`,
-		id, firstName, lastName,
+		player.ID, firstName, lastName,
 	)
-	return err
+	if err != nil {
+		return model.Player{}, err
+	}
+
+	return player, nil
 }
 
 func (p persistence) Get(ctx context.Context, id string) (model.Player, error) {

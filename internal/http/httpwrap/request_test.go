@@ -1,8 +1,10 @@
 package httpwrap
 
 import (
+	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/shoenig/test"
@@ -158,6 +160,28 @@ func TestUnmarshal_Ints(t *testing.T) {
 			test.Eq(t, tc.expCode, StatusCodeForError(err))
 		})
 	}
+}
+
+func TestUnmarshal_ParseForm(t *testing.T) {
+	r := newRequest(t, "")
+	r.Request.Method = http.MethodPost
+	r.Request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	formData := url.Values{}
+	formData.Add("datum1", "foo")
+	formData.Add("datum2", "bar")
+	r.Request.Body = io.NopCloser(strings.NewReader(formData.Encode()))
+
+	var testData struct {
+		Datum1 string `req:"form:datum1"`
+		Datum2 string `req:"form:datum2"`
+	}
+
+	err := r.Unmarshal(&testData)
+	must.NoError(t, err)
+
+	test.Eq(t, "foo", testData.Datum1)
+	test.Eq(t, "bar", testData.Datum2)
 }
 
 func newRequest(t testing.TB, url string) Request {

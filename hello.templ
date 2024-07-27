@@ -1,5 +1,7 @@
 package main
 
+import "github.com/cszczepaniak/go-htmx/internal/player/model"
+
 templ shell() {
 	<html>
 	<script src="https://unpkg.com/htmx.org@2.0.1"></script>
@@ -11,15 +13,25 @@ templ shell() {
 }
 
 templ body() {
-	<button class="bg-blue-300" hx-post="/clicked" hx-target="#content">Click Me</button>
-	<div id="content">Placeholder</div>
-	<div hx-ext="sse" sse-connect="/events" sse-swap="update"></div>
+	@newPlayerForm()
+	<div id="player-list"></div>
+	// <div hx-ext="sse" sse-connect="/events" sse-swap="update"></div>
 }
 
-templ list(items []string) {
+templ list(players []model.Player) {
 	<ul class="flex flex-col space-y-2">
-	for _, item := range items {
-		<li class="text-xl">{ item }</li>
+	for _, player := range players {
+		<li class="text-xl">{ player.FirstName } { player.LastName }</li>
 	}
 	</ul>
+}
+
+templ newPlayerForm() {
+	<form class="flex flex-col p-4 space-y-2" hx-post="/players" hx-target="#player-list">
+		<label for="firstName">First Name</label>
+		<input name="firstName" class="border" />
+		<label for="lastName">Last Name</label>
+		<input name="lastName" class="border" />
+		<button type="submit" class="border rounded">Create</button>
+	</form>
 }

@@ -2,12 +2,16 @@ package main
 
 import (
 	"context"
+	"embed"
 	"net/http"
 
 	"github.com/cszczepaniak/go-htmx/internal/http/router"
 	psql "github.com/cszczepaniak/go-htmx/internal/persistence/sql"
 	"github.com/cszczepaniak/go-htmx/internal/sql"
 )
+
+//go:embed web/dist/*
+var webAssets embed.FS
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -24,7 +28,7 @@ func main() {
 		panic(err)
 	}
 
-	h := router.Setup(p)
+	h := router.Setup(webAssets, p)
 
 	err = http.ListenAndServe(":8080", h)
 	if err != nil {

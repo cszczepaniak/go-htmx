@@ -1,6 +1,7 @@
 package router
 
 import (
+	"io/fs"
 	"net/http"
 
 	"github.com/cszczepaniak/go-htmx/internal/home"
@@ -10,13 +11,13 @@ import (
 	"github.com/cszczepaniak/go-htmx/internal/web/components"
 )
 
-func Setup(p persistence.Persistence) http.Handler {
+func Setup(static fs.FS, p persistence.Persistence) http.Handler {
 	m := http.NewServeMux()
 
 	// Static files
 	m.Handle(
 		"GET /web/dist/",
-		http.FileServer(http.Dir("./")),
+		http.FileServerFS(static),
 	)
 
 	// Home

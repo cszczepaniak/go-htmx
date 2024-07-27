@@ -18,6 +18,7 @@ func Setup(p persistence.Persistence) http.Handler {
 		m,
 		"GET /",
 		components.Handler(home.Home()),
+		components.ShellMiddleware,
 	)
 
 	// Players

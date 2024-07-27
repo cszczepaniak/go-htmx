@@ -13,6 +13,12 @@ import (
 func Setup(p persistence.Persistence) http.Handler {
 	m := http.NewServeMux()
 
+	// Static files
+	m.Handle(
+		"GET /web/dist/",
+		http.FileServer(http.Dir("./")),
+	)
+
 	// Home
 	httpwrap.Handle(
 		m,

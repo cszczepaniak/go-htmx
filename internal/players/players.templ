@@ -1,8 +1,6 @@
 package players
 
-import (
-	"github.com/cszczepaniak/go-htmx/internal/players/model"
-)
+import "github.com/cszczepaniak/go-htmx/internal/players/model"
 
 templ Players(players []model.Player) {
 	<h1>Players page!</h1>
@@ -15,9 +13,9 @@ templ Players(players []model.Player) {
 templ newPlayerForm() {
 	<form class="flex flex-col p-4 space-y-2" hx-post="/players" hx-target="#player-list">
 		<label for="firstName">First Name</label>
-		<input name="firstName" class="border" />
+		<input name="firstName" class="border"/>
 		<label for="lastName">Last Name</label>
-		<input name="lastName" class="border" />
+		<input name="lastName" class="border"/>
 		<button type="submit" class="border rounded">Create</button>
 	</form>
 }
@@ -26,9 +24,9 @@ templ playerList(players []model.Player) {
 	for _, p := range players {
 		<li>
 			<span>{ p.FirstName } { p.LastName }</span>
-			<button 
+			<button
 				hx-delete={ deletePlayerRoute(p.ID) }
-				hx-target="#player-list" 
+				hx-target="#player-list"
 				hx-vals={ data() }
 				class="bg-red-400"
 			>delete it</button>
@@ -37,7 +35,7 @@ templ playerList(players []model.Player) {
 }
 
 func deletePlayerRoute(id string) string {
-	return "/players/"+id
+	return "/players/" + id
 }
 
 func data() string {

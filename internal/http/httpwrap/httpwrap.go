@@ -3,32 +3,25 @@ package httpwrap
 import (
 	"context"
 	"fmt"
-	"io"
 	"net/http"
 )
 
-type Renderer interface {
-	// Render should render a result to the given writer. This could be an HTML template or any
-	// other type of data being returned from the HTTP handler.
-	Render(ctx context.Context, w io.Writer) error
-}
+type Handler func(ctx context.Context, req Request) error
 
-type Handler[T Renderer] func(ctx context.Context, req Request) (T, error)
+type Middleware func(Handler) Handler
 
-type Middleware[T Renderer] func(Handler[T]) Handler[T]
-
-func Handle[T Renderer](
+func Handle(
 	m *http.ServeMux,
 	pattern string,
-	handler Handler[T],
-	middleware ...Middleware[T],
+	handler Handler,
+	middleware ...Middleware,
 ) {
 	m.Handle(pattern, WrapHandler(handler, middleware...))
 }
 
-func WrapHandler[T Renderer](
-	handler Handler[T],
-	mw ...Middleware[T],
+func WrapHandler(
+	handler Handler,
+	mw ...Middleware,
 ) http.HandlerFunc {
 	// Wrap the middlewares by looping through backwards. By going backwards, the first middleware
 	// in the list will be the first one called, so it retains the order passed to us.
@@ -41,30 +34,21 @@ func WrapHandler[T Renderer](
 		ctx := r.Context()
 		req := Request{
 			Request:  r,
-			Response: w,
+			response: w,
 		}
 
-		renderer, err := h(ctx, req)
+		err := h(ctx, req)
 		if err != nil {
 			// Gotta set up logging!
 			fmt.Println("error rendering", err)
 
-			w.WriteHeader(statusFromError(err))
+			status := StatusCodeForError(err)
+			w.WriteHeader(status)
+
 			_, err := w.Write([]byte(err.Error()))
 			if err != nil {
-				/// TODO Log!
+				// TODO Log!
 			}
-
-			return
-		}
-
-		err = renderer.Render(r.Context(), w)
-		if err != nil {
-			// Gotta set up logging!
 		}
 	}
-}
-
-func statusFromError(_ error) int {
-	return http.StatusInternalServerError
 }

@@ -1,5 +1,9 @@
 package home
 
+import "github.com/cszczepaniak/go-htmx/internal/web/components"
+
 templ Home() {
-	<h1 class="text-red-300">Home page!</h1>
+	@components.Base() {
+		<h1 class="text-red-300">Home page!</h1>
+	}
 }

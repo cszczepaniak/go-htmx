@@ -1,13 +1,18 @@
 package players
 
-import "github.com/cszczepaniak/go-htmx/internal/players/model"
+import (
+	"github.com/cszczepaniak/go-htmx/internal/players/model"
+	"github.com/cszczepaniak/go-htmx/internal/web/components"
+)
 
 templ Players(players []model.Player) {
-	<h1>Players page!</h1>
-	@newPlayerForm()
-	<ul id="player-list">
-		@playerList(players)
-	</ul>
+	@components.Base() {
+		<h1>Players page!</h1>
+		@newPlayerForm()
+		<ul id="player-list">
+			@playerList(players)
+		</ul>
+	}
 }
 
 templ newPlayerForm() {
@@ -27,7 +32,6 @@ templ playerList(players []model.Player) {
 			<button
 				hx-delete={ deletePlayerRoute(p.ID) }
 				hx-target="#player-list"
-				hx-vals={ data() }
 				class="bg-red-400"
 			>delete it</button>
 		</li>
@@ -36,8 +40,4 @@ templ playerList(players []model.Player) {
 
 func deletePlayerRoute(id string) string {
 	return "/players/" + id
-}
-
-func data() string {
-	return `{"id":123}`
 }

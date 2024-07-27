@@ -1,6 +1,6 @@
 package components
 
-templ Head(c templ.Component) {
+templ Base() {
 	<html>
 		<head>
 			<script src="https://unpkg.com/htmx.org@2.0.1"></script>
@@ -8,7 +8,7 @@ templ Head(c templ.Component) {
 			<link rel="stylesheet" href="/web/dist/styles.css"/>
 		</head>
 		<body>
-			@c
+			{ children... }
 		</body>
 	</html>
 }

@@ -25,7 +25,6 @@ func Setup(static fs.FS, p persistence.Persistence) http.Handler {
 		m,
 		"GET /",
 		components.Handler(home.Home()),
-		components.ShellMiddleware,
 	)
 
 	// Players
@@ -33,7 +32,6 @@ func Setup(static fs.FS, p persistence.Persistence) http.Handler {
 		m,
 		"GET /players",
 		players.GetHandler(p.PlayerStore),
-		components.ShellMiddleware,
 	)
 	httpwrap.Handle(
 		m,

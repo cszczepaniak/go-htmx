@@ -1,17 +1,24 @@
 package httpwrap
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/a-h/templ"
 )
 
 type Request struct {
 	Request  *http.Request
-	Response http.ResponseWriter
+	response http.ResponseWriter
+}
+
+func (r Request) Render(ctx context.Context, c templ.Component) error {
+	return c.Render(ctx, r.response)
 }
 
 // Unmarshal hydrates the given value with values from the request. It does so using struct tags.

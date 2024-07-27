@@ -27,13 +27,17 @@ func GetHandler(s Store) httpwrap.Handler[templ.Component] {
 
 func PostHandler(s Store) httpwrap.Handler[templ.Component] {
 	return func(ctx context.Context, req httpwrap.Request) (templ.Component, error) {
-		err := req.Request.ParseForm()
+		var data struct {
+			FirstName string `req:"form:firstName,required"`
+			LastName  string `req:"form:lastName,required"`
+		}
+
+		err := req.Unmarshal(&data)
 		if err != nil {
 			return nil, err
 		}
 
-		// TODO validate the first name and the last name
-		_, err = s.InsertPlayer(ctx, req.Request.FormValue("firstName"), req.Request.FormValue("lastName"))
+		_, err = s.InsertPlayer(ctx, data.FirstName, data.LastName)
 		if err != nil {
 			return nil, err
 		}
@@ -49,7 +53,16 @@ func PostHandler(s Store) httpwrap.Handler[templ.Component] {
 
 func DeleteHandler(s Store) httpwrap.Handler[templ.Component] {
 	return func(ctx context.Context, req httpwrap.Request) (templ.Component, error) {
-		err := s.DeletePlayer(ctx, req.Request.PathValue("id"))
+		var data struct {
+			ID string `req:"path:id,required"`
+		}
+
+		err := req.Unmarshal(&data)
+		if err != nil {
+			return nil, err
+		}
+
+		err = s.DeletePlayer(ctx, data.ID)
 		if err != nil {
 			return nil, err
 		}

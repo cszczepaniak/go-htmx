@@ -1,6 +1,7 @@
 package players
 
 import (
+	"fmt"
 	"github.com/cszczepaniak/go-htmx/internal/players/model"
 	"github.com/cszczepaniak/go-htmx/internal/web/components"
 )
@@ -30,14 +31,10 @@ templ playerList(players []model.Player) {
 		<li>
 			<span>{ p.FirstName } { p.LastName }</span>
 			<button
-				hx-delete={ deletePlayerRoute(p.ID) }
+				hx-delete={ fmt.Sprintf("/players/%s", p.ID) }
 				hx-target="#player-list"
 				class="bg-red-400"
 			>delete it</button>
 		</li>
 	}
-}
-
-func deletePlayerRoute(id string) string {
-	return "/players/" + id
 }

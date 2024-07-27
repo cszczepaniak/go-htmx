@@ -112,6 +112,10 @@ func (p persistence) GetPlayers(ctx context.Context) ([]model.Player, error) {
 	return players, nil
 }
 
+func (p persistence) DeletePlayer(ctx context.Context, id string) error {
+	return isql.MustExecOne(ctx, p.db, `DELETE FROM Players WHERE ID = ?`, id)
+}
+
 func (p persistence) InsertTeam(ctx context.Context) (model.Team, error) {
 	id := uuid.NewString()
 

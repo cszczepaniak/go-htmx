@@ -57,6 +57,17 @@ func TestPlayers(t *testing.T) {
 		[]model.Player{p1, p2},
 		players,
 	)
+
+	// DeletePlayer should work.
+	must.NoError(t, p.DeletePlayer(ctx, p2.ID))
+
+	players, err = p.GetPlayers(ctx)
+	must.NoError(t, err)
+	test.SliceContainsAll(
+		t,
+		[]model.Player{p1},
+		players,
+	)
 }
 
 func TestTeams(t *testing.T) {

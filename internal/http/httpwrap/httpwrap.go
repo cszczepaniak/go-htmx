@@ -13,7 +13,12 @@ type Renderer interface {
 	Render(ctx context.Context, w io.Writer) error
 }
 
-type Handler[T Renderer] func(w http.ResponseWriter, r *http.Request) (T, error)
+type Request struct {
+	Request  *http.Request
+	Response http.ResponseWriter
+}
+
+type Handler[T Renderer] func(ctx context.Context, req Request) (T, error)
 
 type Middleware[T Renderer] func(Handler[T]) Handler[T]
 
@@ -38,7 +43,13 @@ func WrapHandler[T Renderer](
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		renderer, err := h(w, r)
+		ctx := r.Context()
+		req := Request{
+			Request:  r,
+			Response: w,
+		}
+
+		renderer, err := h(ctx, req)
 		if err != nil {
 			// Gotta set up logging!
 			fmt.Println("error rendering", err)

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/cszczepaniak/go-htmx/internal/player/model"
+	"github.com/cszczepaniak/go-htmx/internal/players/model"
 	isql "github.com/cszczepaniak/go-htmx/internal/sql"
 	"github.com/shoenig/test"
 	"github.com/shoenig/test/must"
@@ -47,6 +47,15 @@ func TestPlayers(t *testing.T) {
 			LastName:  "star",
 		},
 		p2,
+	)
+
+	// GetPlayers should give us everything that we already validated.
+	players, err := p.GetPlayers(ctx)
+	must.NoError(t, err)
+	test.SliceContainsAll(
+		t,
+		[]model.Player{p1, p2},
+		players,
 	)
 }
 

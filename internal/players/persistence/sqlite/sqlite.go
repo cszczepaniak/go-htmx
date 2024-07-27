@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/cszczepaniak/go-htmx/internal/player/model"
+	"github.com/cszczepaniak/go-htmx/internal/players/model"
 	isql "github.com/cszczepaniak/go-htmx/internal/sql"
 	"github.com/google/uuid"
 )
@@ -77,6 +77,39 @@ func (p persistence) GetPlayer(ctx context.Context, id string) (model.Player, er
 	}
 
 	return player, nil
+}
+
+func (p persistence) GetPlayers(ctx context.Context) ([]model.Player, error) {
+	rows, err := p.db.QueryContext(
+		ctx,
+		`SELECT ID, FirstName, LastName, TeamID FROM Players`,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var players []model.Player
+	for rows.Next() {
+		var p model.Player
+		var teamID sql.NullString
+		err := rows.Scan(&p.ID, &p.FirstName, &p.LastName, &teamID)
+		if err != nil {
+			return nil, err
+		}
+
+		// We need to use the NullString for teamID even though we're not going to check it's valid;
+		// if it's NULL we just want the empty string.
+		p.TeamID = teamID.String
+
+		players = append(players, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return players, nil
 }
 
 func (p persistence) InsertTeam(ctx context.Context) (model.Team, error) {

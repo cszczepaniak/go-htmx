@@ -13,11 +13,6 @@ type Renderer interface {
 	Render(ctx context.Context, w io.Writer) error
 }
 
-type Request struct {
-	Request  *http.Request
-	Response http.ResponseWriter
-}
-
 type Handler[T Renderer] func(ctx context.Context, req Request) (T, error)
 
 type Middleware[T Renderer] func(Handler[T]) Handler[T]

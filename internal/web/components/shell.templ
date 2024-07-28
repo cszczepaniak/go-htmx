@@ -8,7 +8,22 @@ templ Base() {
 			<link rel="stylesheet" href="/web/dist/styles.css"/>
 		</head>
 		<body>
-			{ children... }
+			<nav class="py-2 px-4 bg-blue-500 flex flex-row">
+				<div class="flex flex-row items-center space-x-4">
+					<span class="text-3xl text-white mr-4">
+						Cribbly
+					</span>
+					<a href="/" class="text-md text-white">
+						Home
+					</a>
+					<a href="/players" class="text-md text-white">
+						Players
+					</a>
+				</div>
+			</nav>
+			<div class="p-4">
+				{ children... }
+			</div>
 		</body>
 	</html>
 }

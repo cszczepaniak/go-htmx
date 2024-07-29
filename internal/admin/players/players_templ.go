@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/cszczepaniak/go-htmx/internal/admin"
-	"github.com/cszczepaniak/go-htmx/internal/players/model"
+	"github.com/cszczepaniak/go-htmx/internal/admin/players/model"
 )
 
 func Players(players []model.Player) templ.Component {

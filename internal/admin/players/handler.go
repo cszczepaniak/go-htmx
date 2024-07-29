@@ -3,8 +3,8 @@ package players
 import (
 	"context"
 
+	"github.com/cszczepaniak/go-htmx/internal/admin/players/model"
 	"github.com/cszczepaniak/go-htmx/internal/http/httpwrap"
-	"github.com/cszczepaniak/go-htmx/internal/players/model"
 )
 
 type Store interface {

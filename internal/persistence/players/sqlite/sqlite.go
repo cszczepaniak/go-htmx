@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/cszczepaniak/go-htmx/internal/players/model"
+	"github.com/cszczepaniak/go-htmx/internal/admin/players/model"
 	isql "github.com/cszczepaniak/go-htmx/internal/sql"
 	"github.com/google/uuid"
 )

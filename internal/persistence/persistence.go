@@ -3,7 +3,7 @@ package persistence
 import (
 	"context"
 
-	"github.com/cszczepaniak/go-htmx/internal/players"
+	"github.com/cszczepaniak/go-htmx/internal/admin/players"
 )
 
 type initer interface {

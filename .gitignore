@@ -2,4 +2,5 @@ tmp
 *.db
 web/dist
 go-htmx
+.env
 log/

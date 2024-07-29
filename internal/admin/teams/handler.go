@@ -30,6 +30,39 @@ func GetHandler(s Store) httpwrap.Handler {
 	}
 }
 
+func EditTeamHandler(s Store) httpwrap.Handler {
+	return func(ctx context.Context, req httpwrap.Request) error {
+		var data struct {
+			ID string `req:"path:id,required"`
+		}
+
+		err := req.Unmarshal(&data)
+		if err != nil {
+			return err
+		}
+
+		ps, err := s.GetPlayers(ctx)
+		if err != nil {
+			return err
+		}
+
+		teams, err := s.GetTeams(ctx)
+		if err != nil {
+			return err
+		}
+
+		var team model.Team
+		for _, t := range teams {
+			if t.ID == data.ID {
+				team = t
+				break
+			}
+		}
+
+		return req.Render(ctx, EditTeam(ps, teams, team))
+	}
+}
+
 func PostHandler(s Store) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		_, err := s.InsertTeam(ctx)

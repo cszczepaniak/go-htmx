@@ -59,6 +59,11 @@ func Setup(static fs.FS, p persistence.Persistence) http.Handler {
 	)
 	httpwrap.Handle(
 		m,
+		"GET /admin/teams/{id}/edit",
+		teams.EditTeamHandler(p.PlayerStore),
+	)
+	httpwrap.Handle(
+		m,
 		"POST /admin/teams",
 		teams.PostHandler(p.PlayerStore),
 	)

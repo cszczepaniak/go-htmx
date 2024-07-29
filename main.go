@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"embed"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/cszczepaniak/go-htmx/internal/http/router"
 	psql "github.com/cszczepaniak/go-htmx/internal/persistence/sql"
@@ -29,6 +31,15 @@ func main() {
 	}
 
 	h := router.Setup(webAssets, p)
+
+	f, err := os.OpenFile("./log/server.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	log.SetOutput(f)
+	log.Println("serving traffic!")
 
 	err = http.ListenAndServe(":8080", h)
 	if err != nil {

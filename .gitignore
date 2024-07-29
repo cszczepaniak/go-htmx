@@ -2,3 +2,4 @@ tmp
 *.db
 web/dist
 go-htmx
+log/

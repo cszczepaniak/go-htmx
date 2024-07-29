@@ -1,0 +1,68 @@
+package players
+
+import (
+	"fmt"
+	"github.com/cszczepaniak/go-htmx/internal/admin"
+	"github.com/cszczepaniak/go-htmx/internal/players/model"
+)
+
+templ Players(players []model.Player) {
+	@admin.Layout("/admin/players") {
+		<div class="space-y-6">
+			<div>
+				<h1 class="font-medium text-lg">Players</h1>
+				<p class="text-gray-600">Manage players in the tournament.</p>
+			</div>
+			<hr/>
+			@newPlayerForm()
+			<hr/>
+			<h2 class="font-medium text-lg">All Players</h2>
+			@playerList(players)
+		</div>
+	}
+}
+
+templ newPlayerForm() {
+	<h2 class="font-medium text-lg">Add Player</h2>
+	<form
+		class="flex flex-col space-y-2"
+		hx-post="/admin/players"
+		hx-target="#player-list"
+		hx-swap="outerHTML"
+	>
+		<label for="firstName" class="text-sm font-medium">First Name</label>
+		<input
+			name="firstName"
+			class="border rounded-md px-3 py-1 text-sm shadow-sm h-9"
+		/>
+		<label for="lastName" class="text-sm font-medium">Last Name</label>
+		<input
+			name="lastName"
+			class="border rounded-md px-3 py-1 text-sm shadow-sm h-9"
+		/>
+		<button type="submit" class="px-3 py-1 text-sm shadow-sm h-9 border rounded-md">Create</button>
+	</form>
+}
+
+templ playerList(players []model.Player) {
+	<ul id="player-list" class="space-y-2" hx-swap="outerHTML">
+		for _, p := range players {
+			<li class="flex flex-row justify-between">
+				<span class="text-md">{ p.FirstName } { p.LastName }</span>
+				<button
+					hx-delete={ fmt.Sprintf("/admin/players/%s", p.ID) }
+					hx-target="#player-list"
+					class="text-red-500"
+				>
+					@icon()
+				</button>
+			</li>
+		}
+	</ul>
+}
+
+templ icon() {
+	<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+		<path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
+	</svg>
+}

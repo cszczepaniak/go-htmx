@@ -1,0 +1,67 @@
+package admin
+
+import "github.com/cszczepaniak/go-htmx/internal/web/components"
+
+func sidebarNavItems() []navbarItem {
+	return []navbarItem{{
+		title: "Players",
+		href:  "/admin/players",
+	}, {
+		title: "Teams",
+		href:  "/admin/teams",
+	}, {
+		title: "Divisions",
+		href:  "/admin/divisions",
+	}}
+}
+
+templ Layout(currRoute string) {
+	@components.Base(currRoute) {
+		<div class="space-y-6 p-4 lg:p-10 pb-16">
+			<div class="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
+				<aside class="lg:w-1/5">
+					@SidebarNav(currRoute, sidebarNavItems())
+				</aside>
+				<div class="flex-1 lg:max-w-2xl">
+					{ children... }
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ BareAdminPage() {
+	@Layout("/admin") {
+		<div class="space-y-6">
+			<div>
+				<h1 class="font-medium text-lg">Admin</h1>
+				<p class="text-gray-600">Manage the tournament.</p>
+			</div>
+			<hr/>
+		</div>
+	}
+}
+
+type navbarItem struct {
+	title string
+	href  string
+}
+
+templ SidebarNav(currPath string, items []navbarItem) {
+	<nav class="lg:-mx-4 flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1">
+		for _, item := range items {
+			if item.href == currPath {
+				<a
+					href={ templ.SafeURL(item.href) }
+					class="px-4 py-2 text-left font-semibold rounded-md bg-gray-100 pointer-events-none"
+				>
+					{ item.title }
+				</a>
+			} else {
+				<a href={ templ.SafeURL(item.href) } class="px-4 py-2 text-left font-semibold rounded-md hover:bg-gray-50">
+					{ item.title }
+				</a>
+			}
+		}
+	</nav>
+}

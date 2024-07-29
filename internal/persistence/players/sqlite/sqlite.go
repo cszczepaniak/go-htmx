@@ -242,3 +242,66 @@ func (p persistence) GetTeam(ctx context.Context, id string) (model.Team, error)
 
 	return t, nil
 }
+
+func (p persistence) GetTeams(ctx context.Context) ([]model.Team, error) {
+	rows, err := p.db.QueryContext(
+		ctx,
+		`SELECT t.ID, p.ID, p.FirstName, p.LastName
+			FROM Teams t 
+			LEFT JOIN Players p ON t.ID = p.TeamID
+		ORDER BY t.ID ASC, p.LastName ASC, p.FirstName ASC`,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	playersByTeam := make(map[string][]model.Player)
+	for rows.Next() {
+		var teamID string
+
+		// These might be null if there are no players on the team.
+		var pID, pFirstName, pLastName sql.NullString
+
+		err := rows.Scan(&teamID, &pID, &pFirstName, &pLastName)
+		if err != nil {
+			return nil, err
+		}
+
+		if pID.Valid {
+			p := model.Player{
+				ID:        pID.String,
+				FirstName: pFirstName.String,
+				LastName:  pLastName.String,
+				TeamID:    teamID,
+			}
+
+			playersByTeam[teamID] = append(playersByTeam[teamID], p)
+		} else {
+			// Put the team in the result with no players.
+			playersByTeam[teamID] = nil
+		}
+	}
+
+	res := make([]model.Team, 0, len(playersByTeam))
+	for teamID, players := range playersByTeam {
+		t := model.Team{
+			ID: teamID,
+		}
+
+		switch len(players) {
+		case 0:
+		case 1:
+			t.Player1 = players[0]
+		case 2:
+			t.Player1 = players[0]
+			t.Player2 = players[1]
+		default:
+			return nil, errors.New("more than two players found on a team")
+		}
+
+		res = append(res, t)
+	}
+
+	return res, nil
+}

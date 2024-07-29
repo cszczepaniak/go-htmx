@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/cszczepaniak/go-htmx/internal/players/model"
+	"github.com/cszczepaniak/go-htmx/internal/admin/players/model"
 	isql "github.com/cszczepaniak/go-htmx/internal/sql"
 	"github.com/shoenig/test"
 	"github.com/shoenig/test/must"
@@ -85,49 +85,74 @@ func TestTeams(t *testing.T) {
 	p2, err := p.InsertPlayer(ctx, "patrick", "star")
 	must.NoError(t, err)
 
-	team, err := p.InsertTeam(ctx)
+	team1, err := p.InsertTeam(ctx)
 	must.NoError(t, err)
 
-	test.NotEq(t, "", team.ID)
-	test.Eq(t, model.Player{}, team.Player1)
-	test.Eq(t, model.Player{}, team.Player2)
-	test.Eq(t, "Unnamed Team", team.Name())
+	test.NotEq(t, "", team1.ID)
+	test.Eq(t, model.Player{}, team1.Player1)
+	test.Eq(t, model.Player{}, team1.Player2)
+	test.Eq(t, "Unnamed Team", team1.Name())
 
-	must.NoError(t, p.AddPlayerToTeam(ctx, team.ID, p1.ID))
+	must.NoError(t, p.AddPlayerToTeam(ctx, team1.ID, p1.ID))
 
 	expP1 := p1
-	expP1.TeamID = team.ID
+	expP1.TeamID = team1.ID
 
-	team, err = p.GetTeam(ctx, team.ID)
+	team1, err = p.GetTeam(ctx, team1.ID)
 	must.NoError(t, err)
-	test.NotEq(t, "", team.ID)
-	test.Eq(t, expP1, team.Player1)
-	test.Eq(t, model.Player{}, team.Player2)
-	test.Eq(t, "squarepants", team.Name())
+	test.NotEq(t, "", team1.ID)
+	test.Eq(t, expP1, team1.Player1)
+	test.Eq(t, model.Player{}, team1.Player2)
+	test.Eq(t, "squarepants", team1.Name())
 
-	test.NoError(t, p.AddPlayerToTeam(ctx, team.ID, p2.ID))
+	test.NoError(t, p.AddPlayerToTeam(ctx, team1.ID, p2.ID))
 
 	expP2 := p2
-	expP2.TeamID = team.ID
+	expP2.TeamID = team1.ID
 
-	team, err = p.GetTeam(ctx, team.ID)
+	team1, err = p.GetTeam(ctx, team1.ID)
 	must.NoError(t, err)
-	test.NotEq(t, "", team.ID)
-	test.Eq(t, expP1, team.Player1)
-	test.Eq(t, expP2, team.Player2)
-	test.Eq(t, "squarepants/star", team.Name())
+	test.NotEq(t, "", team1.ID)
+	test.Eq(t, expP1, team1.Player1)
+	test.Eq(t, expP2, team1.Player2)
+	test.Eq(t, "squarepants/star", team1.Name())
 
 	// Adding another player at this point should error.
 	p3, err := p.InsertPlayer(ctx, "anotha", "one")
 	must.NoError(t, err)
 
-	err = p.AddPlayerToTeam(ctx, team.ID, p3.ID)
+	err = p.AddPlayerToTeam(ctx, team1.ID, p3.ID)
 	test.ErrorIs(t, err, errTeamFull)
 
 	// Adding a player to more than one team should also error.
-	t2, err := p.InsertTeam(ctx)
+	team2, err := p.InsertTeam(ctx)
 	must.NoError(t, err)
 
-	err = p.AddPlayerToTeam(ctx, t2.ID, p2.ID)
+	err = p.AddPlayerToTeam(ctx, team2.ID, p2.ID)
 	test.ErrorIs(t, err, errPlayerAlreadyOnTeam)
+
+	// Set up two more teams so we can test GetTeams.
+	must.NoError(t, p.AddPlayerToTeam(ctx, team2.ID, p3.ID))
+	team2, err = p.GetTeam(ctx, team2.ID)
+	must.NoError(t, err)
+
+	team3, err := p.InsertTeam(ctx)
+	must.NoError(t, err)
+
+	teams, err := p.GetTeams(ctx)
+	must.NoError(t, err)
+
+	teamsByID := make(map[string]model.Team, len(teams))
+	for _, team := range teams {
+		teamsByID[team.ID] = team
+	}
+
+	must.MapContainsKey(t, teamsByID, team1.ID)
+	test.Eq(t, team1, teamsByID[team1.ID])
+
+	must.MapContainsKey(t, teamsByID, team2.ID)
+	test.Eq(t, team2, teamsByID[team2.ID])
+
+	must.MapContainsKey(t, teamsByID, team3.ID)
+	test.Eq(t, team3, teamsByID[team3.ID])
 }

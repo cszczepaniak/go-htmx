@@ -5,10 +5,11 @@ import (
 
 	"github.com/cszczepaniak/go-htmx/internal/admin/players/model"
 	"github.com/cszczepaniak/go-htmx/internal/http/httpwrap"
+	"github.com/cszczepaniak/go-htmx/internal/persistence/players"
 )
 
 type Store interface {
-	GetPlayers(ctx context.Context) ([]model.Player, error)
+	GetPlayers(ctx context.Context, opts ...players.GetPlayerOpt) ([]model.Player, error)
 	InsertTeam(ctx context.Context) (model.Team, error)
 	GetTeam(ctx context.Context, id string) (model.Team, error)
 	GetTeams(ctx context.Context) ([]model.Team, error)
@@ -37,7 +38,7 @@ func EditTeamHandler(s Store) httpwrap.Handler {
 			return err
 		}
 
-		ps, err := s.GetPlayers(ctx)
+		ps, err := s.GetPlayers(ctx, players.WithoutTeam())
 		if err != nil {
 			return err
 		}

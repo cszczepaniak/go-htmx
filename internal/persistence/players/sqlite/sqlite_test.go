@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/cszczepaniak/go-htmx/internal/admin/players/model"
+	"github.com/cszczepaniak/go-htmx/internal/persistence/players"
 	isql "github.com/cszczepaniak/go-htmx/internal/sql"
 	"github.com/shoenig/test"
 	"github.com/shoenig/test/must"
@@ -133,28 +134,30 @@ func TestGetPlayers(t *testing.T) {
 	p := newPlayerServiceTester(t)
 	ctx := context.Background()
 
-	players := p.seedPlayers(t, 3)
+	ps := p.seedPlayers(t, 3)
 
 	got, err := p.GetPlayers(ctx)
 	must.NoError(t, err)
 	test.SliceContainsAll(
 		t,
 		got,
-		players,
+		ps,
 	)
 
 	// Add one of the players to a team.
 	team := p.seedTeam(t)
-	p.addPlayerToTeam(t, players[1], team)
+	p.addPlayerToTeam(t, ps[1], team)
 
 	// The player with a team should not be returned.
-	got, err = p.GetPlayers(ctx, WithoutTeam())
+	got, err = p.GetPlayers(ctx, players.WithoutTeam())
 	must.NoError(t, err)
+	test.SliceLen(t, 2, got)
 	test.SliceContainsAll(
 		t,
 		got,
-		[]model.Player{players[0], players[2]},
+		[]model.Player{ps[0], ps[2]},
 	)
+	test.SliceNotContains(t, got, ps[1])
 }
 
 func TestDeletePlayer(t *testing.T) {

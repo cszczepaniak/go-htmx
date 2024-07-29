@@ -5,11 +5,12 @@ import (
 
 	"github.com/cszczepaniak/go-htmx/internal/admin/players/model"
 	"github.com/cszczepaniak/go-htmx/internal/http/httpwrap"
+	"github.com/cszczepaniak/go-htmx/internal/persistence/players"
 )
 
 type Store interface {
 	InsertPlayer(ctx context.Context, firstName, lastName string) (model.Player, error)
-	GetPlayers(ctx context.Context) ([]model.Player, error)
+	GetPlayers(ctx context.Context, opts ...players.GetPlayerOpt) ([]model.Player, error)
 	DeletePlayer(ctx context.Context, id string) error
 }
 

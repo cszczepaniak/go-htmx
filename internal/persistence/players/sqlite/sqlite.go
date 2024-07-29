@@ -79,10 +79,36 @@ func (p persistence) GetPlayer(ctx context.Context, id string) (model.Player, er
 	return player, nil
 }
 
-func (p persistence) GetPlayers(ctx context.Context) ([]model.Player, error) {
+type getPlayerOpts struct {
+	withoutTeam bool
+}
+
+type getPlayerOpt func(getPlayerOpts) getPlayerOpts
+
+func WithoutTeam() getPlayerOpt {
+	return func(gpo getPlayerOpts) getPlayerOpts {
+		gpo.withoutTeam = true
+		return gpo
+	}
+}
+
+func (p persistence) GetPlayers(
+	ctx context.Context,
+	opts ...getPlayerOpt,
+) ([]model.Player, error) {
+	options := getPlayerOpts{}
+	for _, o := range opts {
+		options = o(options)
+	}
+
+	q := `SELECT ID, FirstName, LastName, TeamID FROM Players`
+	if options.withoutTeam {
+		q += ` WHERE TeamID IS NULL`
+	}
+
 	rows, err := p.db.QueryContext(
 		ctx,
-		`SELECT ID, FirstName, LastName, TeamID FROM Players`,
+		q,
 	)
 	if err != nil {
 		return nil, err

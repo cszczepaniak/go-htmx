@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/cszczepaniak/go-htmx/internal/admin/players/model"
@@ -10,7 +11,11 @@ import (
 	"github.com/shoenig/test/must"
 )
 
-func TestPlayers(t *testing.T) {
+type playerServiceTester struct {
+	persistence
+}
+
+func newPlayerServiceTester(t testing.TB) playerServiceTester {
 	db, err := isql.NewMemoryDB()
 	test.NoError(t, err)
 
@@ -19,54 +24,153 @@ func TestPlayers(t *testing.T) {
 	p := NewSQLitePlayerPersistence(db)
 	test.NoError(t, p.Init(ctx))
 
+	return playerServiceTester{
+		persistence: p,
+	}
+}
+
+func (p playerServiceTester) seedPlayers(
+	t testing.TB,
+	n int,
+) []model.Player {
+	t.Helper()
+
+	res := make([]model.Player, 0, n)
+	for i := range n {
+		p, err := p.InsertPlayer(
+			context.Background(),
+			fmt.Sprintf("first%d", i),
+			fmt.Sprintf("last%d", i),
+		)
+		must.NoError(t, err)
+
+		res = append(res, p)
+	}
+
+	return res
+}
+
+func (p playerServiceTester) seedPlayer(
+	t testing.TB,
+) model.Player {
+	t.Helper()
+
+	return p.seedPlayers(t, 1)[0]
+}
+
+func (p playerServiceTester) getPlayer(t testing.TB, id string) model.Player {
+	t.Helper()
+
+	player, err := p.GetPlayer(context.Background(), id)
+	must.NoError(t, err)
+
+	return player
+}
+
+func (p playerServiceTester) getPlayers(t testing.TB) map[string]model.Player {
+	t.Helper()
+
+	players, err := p.GetPlayers(context.Background())
+	must.NoError(t, err)
+
+	byID := make(map[string]model.Player)
+	for _, player := range players {
+		byID[player.ID] = player
+	}
+
+	return byID
+}
+
+func (p playerServiceTester) seedTeams(t testing.TB, n int) []model.Team {
+	t.Helper()
+
+	teams := make([]model.Team, 0, n)
+	for range n {
+		team, err := p.InsertTeam(context.Background())
+		must.NoError(t, err)
+
+		teams = append(teams, team)
+	}
+
+	return teams
+}
+
+func (p playerServiceTester) seedTeam(t testing.TB) model.Team {
+	t.Helper()
+	return p.seedTeams(t, 1)[0]
+}
+
+func (p playerServiceTester) addPlayerToTeam(
+	t testing.TB,
+	player model.Player,
+	team model.Team,
+) {
+	t.Helper()
+
+	must.NoError(t, p.AddPlayerToTeam(context.Background(), team.ID, player.ID))
+}
+
+func TestInsertPlayers(t *testing.T) {
+	p := newPlayerServiceTester(t)
+	ctx := context.Background()
+
 	p1, err := p.InsertPlayer(ctx, "spongebob", "squarepants")
 	test.NoError(t, err)
 
 	p2, err := p.InsertPlayer(ctx, "patrick", "star")
 	test.NoError(t, err)
 
-	p1, err = p.GetPlayer(ctx, p1.ID)
-	test.NoError(t, err)
-	test.Eq(
-		t,
-		model.Player{
-			ID:        p1.ID,
-			FirstName: "spongebob",
-			LastName:  "squarepants",
-		},
-		p1,
-	)
+	players := p.getPlayers(t)
 
-	p2, err = p.GetPlayer(ctx, p2.ID)
-	test.NoError(t, err)
-	test.Eq(
-		t,
-		model.Player{
-			ID:        p2.ID,
-			FirstName: "patrick",
-			LastName:  "star",
-		},
-		p2,
-	)
+	must.MapContainsKey(t, players, p1.ID)
+	test.Eq(t, players[p1.ID], p1)
 
-	// GetPlayers should give us everything that we already validated.
-	players, err := p.GetPlayers(ctx)
+	must.MapContainsKey(t, players, p2.ID)
+	test.Eq(t, players[p2.ID], p2)
+}
+
+func TestGetPlayers(t *testing.T) {
+	p := newPlayerServiceTester(t)
+	ctx := context.Background()
+
+	players := p.seedPlayers(t, 3)
+
+	got, err := p.GetPlayers(ctx)
 	must.NoError(t, err)
 	test.SliceContainsAll(
 		t,
-		[]model.Player{p1, p2},
+		got,
 		players,
 	)
 
-	// DeletePlayer should work.
-	must.NoError(t, p.DeletePlayer(ctx, p2.ID))
+	// Add one of the players to a team.
+	team := p.seedTeam(t)
+	p.addPlayerToTeam(t, players[1], team)
 
-	players, err = p.GetPlayers(ctx)
+	// The player with a team should not be returned.
+	got, err = p.GetPlayers(ctx, WithoutTeam())
 	must.NoError(t, err)
 	test.SliceContainsAll(
 		t,
-		[]model.Player{p1},
-		players,
+		got,
+		[]model.Player{players[0], players[2]},
+	)
+}
+
+func TestDeletePlayer(t *testing.T) {
+	p := newPlayerServiceTester(t)
+	ctx := context.Background()
+
+	players := p.seedPlayers(t, 3)
+
+	must.NoError(t, p.DeletePlayer(ctx, players[1].ID))
+
+	got, err := p.GetPlayers(ctx)
+	must.NoError(t, err)
+	test.SliceContainsAll(
+		t,
+		got,
+		[]model.Player{players[0], players[2]},
 	)
 }
 

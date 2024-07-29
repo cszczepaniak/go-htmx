@@ -24,7 +24,7 @@ templ Teams(teams []model.Team) {
 	}
 }
 
-templ EditTeam(ps []model.Player, teams []model.Team, team model.Team) {
+templ EditTeam(ps []model.Player, team model.Team) {
 	@editTeamModal(ps, team, true)
 }
 

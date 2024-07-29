@@ -10,6 +10,7 @@ import (
 type Store interface {
 	GetPlayers(ctx context.Context) ([]model.Player, error)
 	InsertTeam(ctx context.Context) (model.Team, error)
+	GetTeam(ctx context.Context, id string) (model.Team, error)
 	GetTeams(ctx context.Context) ([]model.Team, error)
 	DeleteTeam(ctx context.Context, id string) error
 }
@@ -41,20 +42,12 @@ func EditTeamHandler(s Store) httpwrap.Handler {
 			return err
 		}
 
-		teams, err := s.GetTeams(ctx)
+		team, err := s.GetTeam(ctx, data.ID)
 		if err != nil {
 			return err
 		}
 
-		var team model.Team
-		for _, t := range teams {
-			if t.ID == data.ID {
-				team = t
-				break
-			}
-		}
-
-		return req.Render(ctx, EditTeam(ps, teams, team))
+		return req.Render(ctx, EditTeam(ps, team))
 	}
 }
 

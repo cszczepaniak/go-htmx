@@ -16,12 +16,11 @@ templ Base(currRoute string) {
 					<span class="text-3xl text-white mr-4">
 						Cribbly
 					</span>
-					<a href="/home" class={ anchorAttrs("/home", currRoute) }>
-						Home
-					</a>
-					<a href="/admin" class={ anchorAttrs("/admin", currRoute) }>
-						Admin
-					</a>
+					for _, href := range []string{"/home", "/admin"} {
+						<a href={ templ.SafeURL(href) } class={ anchorAttrs(href, currRoute) }>
+							Home
+						</a>
+					}
 				</div>
 			</nav>
 			<div>

@@ -32,8 +32,8 @@ func Base(currRoute string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, href := range []string{"/home", "/admin"} {
-			var templ_7745c5c3_Var2 = []any{anchorAttrs(href, currRoute)}
+		for _, n := range navItems() {
+			var templ_7745c5c3_Var2 = []any{anchorAttrs(n.href, currRoute)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -42,7 +42,7 @@ func Base(currRoute string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var3 templ.SafeURL = templ.SafeURL(href)
+			var templ_7745c5c3_Var3 templ.SafeURL = templ.SafeURL(n.href)
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var3)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -60,7 +60,20 @@ func Base(currRoute string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">Home</a>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(n.name)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/shell.templ`, Line: 21, Col: 15}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -86,4 +99,19 @@ func anchorAttrs(href, currRoute string) string {
 		return "p-1 text-md text-white font-medium border-white border-b-2"
 	}
 	return "p-1 text-md text-white"
+}
+
+type navItem struct {
+	name string
+	href string
+}
+
+func navItems() []navItem {
+	return []navItem{{
+		name: "Home",
+		href: "/home",
+	}, {
+		name: "Admin",
+		href: "/admin",
+	}}
 }

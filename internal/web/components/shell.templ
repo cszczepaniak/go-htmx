@@ -16,9 +16,9 @@ templ Base(currRoute string) {
 					<span class="text-3xl text-white mr-4">
 						Cribbly
 					</span>
-					for _, href := range []string{"/home", "/admin"} {
-						<a href={ templ.SafeURL(href) } class={ anchorAttrs(href, currRoute) }>
-							Home
+					for _, n := range navItems() {
+						<a href={ templ.SafeURL(n.href) } class={ anchorAttrs(n.href, currRoute) }>
+							{ n.name }
 						</a>
 					}
 				</div>
@@ -35,4 +35,19 @@ func anchorAttrs(href, currRoute string) string {
 		return "p-1 text-md text-white font-medium border-white border-b-2"
 	}
 	return "p-1 text-md text-white"
+}
+
+type navItem struct {
+	name string
+	href string
+}
+
+func navItems() []navItem {
+	return []navItem{{
+		name: "Home",
+		href: "/home",
+	}, {
+		name: "Admin",
+		href: "/admin",
+	}}
 }

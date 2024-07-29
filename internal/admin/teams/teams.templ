@@ -1,0 +1,15 @@
+package teams
+
+import "github.com/cszczepaniak/go-htmx/internal/admin"
+
+templ Teams() {
+	@admin.Layout("/admin/teams") {
+		<div class="space-y-6">
+			<div>
+				<h1 class="font-medium text-lg">Teams</h1>
+				<p class="text-gray-600">Manage teams in the tournament.</p>
+			</div>
+			<hr/>
+		</div>
+	}
+}

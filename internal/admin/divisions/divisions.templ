@@ -1,0 +1,15 @@
+package divisions
+
+import "github.com/cszczepaniak/go-htmx/internal/admin"
+
+templ Divisions() {
+	@admin.Layout("/admin/divisions") {
+		<div class="space-y-6">
+			<div>
+				<h1 class="font-medium text-lg">Divisions</h1>
+				<p class="text-gray-600">Manage divisions in the tournament.</p>
+			</div>
+			<hr/>
+		</div>
+	}
+}

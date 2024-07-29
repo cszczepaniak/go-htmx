@@ -16,17 +16,12 @@ type Store interface {
 
 func GetHandler(s Store) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
-		ps, err := s.GetPlayers(ctx)
-		if err != nil {
-			return err
-		}
-
 		teams, err := s.GetTeams(ctx)
 		if err != nil {
 			return err
 		}
 
-		return req.Render(ctx, Teams(ps, teams))
+		return req.Render(ctx, Teams(teams))
 	}
 }
 

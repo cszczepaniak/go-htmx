@@ -368,7 +368,7 @@ func teamDetails(team model.Team) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else if team.Player2.ID == "" {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p class=\"italic text-gray-600 text-sm\">This team needs 1 more players. Add players by selecting from the list below.</p><p>Player 1: ")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p class=\"italic text-gray-600 text-sm\">This team needs 1 more player. Add players by selecting from the list below.</p><p>Player 1: ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

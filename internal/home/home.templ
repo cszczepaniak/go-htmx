@@ -3,7 +3,7 @@ package home
 import "github.com/cszczepaniak/go-htmx/internal/web/components"
 
 templ Home() {
-	@components.Base() {
+	@components.Base("/home") {
 		<h1 class="text-red-300">Home page!</h1>
 	}
 }

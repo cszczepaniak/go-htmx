@@ -1,6 +1,8 @@
 package components
 
-templ Base() {
+import "strings"
+
+templ Base(currRoute string) {
 	<html>
 		<head>
 			<script src="https://unpkg.com/htmx.org@2.0.1"></script>
@@ -14,17 +16,24 @@ templ Base() {
 					<span class="text-3xl text-white mr-4">
 						Cribbly
 					</span>
-					<a href="/" class="text-md text-white">
+					<a href="/home" class={ anchorAttrs("/home", currRoute) }>
 						Home
 					</a>
-					<a href="/players" class="text-md text-white">
-						Players
+					<a href="/admin" class={ anchorAttrs("/admin", currRoute) }>
+						Admin
 					</a>
 				</div>
 			</nav>
-			<div class="p-4">
+			<div>
 				{ children... }
 			</div>
 		</body>
 	</html>
+}
+
+func anchorAttrs(href, currRoute string) string {
+	if strings.HasPrefix(currRoute, href) {
+		return "p-1 text-md text-white font-medium border-white border-b-2"
+	}
+	return "p-1 text-md text-white"
 }

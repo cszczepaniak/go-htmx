@@ -305,3 +305,7 @@ func (p persistence) GetTeams(ctx context.Context) ([]model.Team, error) {
 
 	return res, nil
 }
+
+func (p persistence) DeleteTeam(ctx context.Context, id string) error {
+	return isql.MustExecOne(ctx, p.db, `DELETE FROM Teams WHERE ID = ?`, id)
+}

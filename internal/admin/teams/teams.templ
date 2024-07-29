@@ -1,8 +1,12 @@
 package teams
 
-import "github.com/cszczepaniak/go-htmx/internal/admin"
+import (
+	"fmt"
+	"github.com/cszczepaniak/go-htmx/internal/admin"
+	"github.com/cszczepaniak/go-htmx/internal/admin/players/model"
+)
 
-templ Teams() {
+templ Teams(ps []model.Player, teams []model.Team) {
 	@admin.Layout("/admin/teams") {
 		<div class="space-y-6">
 			<div>
@@ -10,6 +14,75 @@ templ Teams() {
 				<p class="text-gray-600">Manage teams in the tournament.</p>
 			</div>
 			<hr/>
+			<button class="px-3 py-1 text-sm shadow-sm h-9 border rounded-md" hx-post="/admin/teams" hx-target="#team-list">
+				Add Team
+			</button>
+			<hr/>
+			@teamList(teams)
 		</div>
+		<dialog class="rounded-md border mx-auto mt-32 w-[32rem]">
+			<div class="space-y-6 p-6 flex flex-col">
+				<div>
+					<div class="flex flex-row justify-between">
+						<h1 class="font-medium text-lg mb-2">Create New Team</h1>
+						<button onclick="document.querySelector('dialog').close()">
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+							</svg>
+						</button>
+					</div>
+					<hr/>
+				</div>
+				<div>
+					<p>Player 1</p>
+				</div>
+				<div>
+					<p>Player 2</p>
+				</div>
+				//<div class="flex flex-col">
+				//<label for="player-search" class="text-sm font-medium">Search for Players</label>
+				//<input
+				//name="player-search"
+				//class="border rounded-md px-3 py-1 text-sm shadow-sm h-9"
+				///>
+				//</div>
+				<ul class="flex flex-col space-y-2 max-h-48 overflow-y-scroll">
+					for _, p := range ps {
+						<div class="flex flex-row justify-between">
+							<li>{ p.Name() }</li>
+							<button class="pr-2 text-green-500">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
+								</svg>
+							</button>
+						</div>
+					}
+				</ul>
+			</div>
+		</dialog>
+		<button onclick="document.querySelector('dialog').showModal()">click</button>
 	}
+}
+
+templ teamList(teams []model.Team) {
+	<ul id="team-list" class="space-y-2" hx-swap="outerHTML">
+		for _, t := range teams {
+			<li class="flex flex-row justify-between">
+				<span class="text-md">{ t.Name() }</span>
+				<button
+					hx-delete={ fmt.Sprintf("/admin/teams/%s", t.ID) }
+					hx-target="#team-list"
+					class="text-red-700"
+				>
+					@icon()
+				</button>
+			</li>
+		}
+	</ul>
+}
+
+templ icon() {
+	<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+		<path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
+	</svg>
 }

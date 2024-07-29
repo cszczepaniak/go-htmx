@@ -62,7 +62,7 @@ templ editTeamModal(ps []model.Player, team model.Team, open bool) {
 					<div>
 						<div class="flex flex-row justify-between">
 							<h1 class="font-medium text-lg mb-2">Edit Team</h1>
-							<button onclick="document.querySelector('dialog').close()">
+							<button hx-get="/admin/teams/list" onclick="document.querySelector('dialog').close()">
 								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
 									<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
 								</svg>
@@ -70,37 +70,12 @@ templ editTeamModal(ps []model.Player, team model.Team, open bool) {
 						</div>
 						<hr/>
 					</div>
-					if team.Player1.ID == "" {
-						<p class="italic text-gray-600 text-sm">
-							This team needs 2 more players. Add players by selecting from the list
-							below.
-						</p>
-					} else if team.Player2.ID == "" {
-						<p class="italic text-gray-600 text-sm">
-							This team needs 1 more players. Add players by selecting from the list
-							below.
-						</p>
-						<p>Player 1</p>
-					} else {
-						<p>Player 1</p>
-						<p>Player 2</p>
-					}
+					@teamDetails(team)
 					<div>
 						<p class="font-medium mb-2">Player List</p>
 						<hr/>
 					</div>
-					<ul class="flex flex-col space-y-2 max-h-96 overflow-y-auto">
-						for _, p := range ps {
-							<div class="flex flex-row justify-between">
-								<li>{ p.Name() }</li>
-								<button class="pr-2 text-green-500">
-									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
-									</svg>
-								</button>
-							</div>
-						}
-					</ul>
+					@editTeamPlayerList(team.ID, ps)
 				</div>
 			</dialog>
 			// This way we can control whether or not the modal is open based on a server variable. The
@@ -112,6 +87,57 @@ templ editTeamModal(ps []model.Player, team model.Team, open bool) {
 				document.querySelector('dialog').showModal();
 				document.activeElement?.blur();
 			</script>
+		}
+	</div>
+}
+
+templ editTeamPlayerList(teamID string, ps []model.Player) {
+	<ul id="player-list" class="flex flex-col space-y-2 max-h-96 overflow-y-auto">
+		for _, p := range ps {
+			<div class="flex flex-row justify-between">
+				<li>{ p.Name() }</li>
+				<button id={ fmt.Sprintf("add-player-%s", p.ID) } class="pr-2 text-green-500">
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
+					</svg>
+				</button>
+				// These hidden divs exist only so we can trigger multiple requests from the
+				// button's click.
+				<div
+					class="hidden"
+					hx-trigger={ fmt.Sprintf("click from:#add-player-%s", p.ID) }
+					hx-post={ fmt.Sprintf("/admin/teams/%s/player/%s", teamID, p.ID) }
+					hx-target="#edit-team-modal"
+					hx-swap="outerHTML"
+				></div>
+				<div
+					class="hidden"
+					hx-trigger={ fmt.Sprintf("click from:#add-player-%s", p.ID) }
+					hx-get="/admin/teams/list"
+					hx-target="#team-list"
+					hx-swap="outerHTML"
+				></div>
+			</div>
+		}
+	</ul>
+}
+
+templ teamDetails(team model.Team) {
+	<div>
+		if team.Player1.ID == "" {
+			<p class="italic text-gray-600 text-sm">
+				This team needs 2 more players. Add players by selecting from the list
+				below.
+			</p>
+		} else if team.Player2.ID == "" {
+			<p class="italic text-gray-600 text-sm">
+				This team needs 1 more players. Add players by selecting from the list
+				below.
+			</p>
+			<p>Player 1: { team.Player1.Name() }</p>
+		} else {
+			<p>Player 1: { team.Player1.Name() }</p>
+			<p>Player 2: { team.Player2.Name() }</p>
 		}
 	</div>
 }

@@ -14,6 +14,7 @@ type Store interface {
 	GetTeam(ctx context.Context, id string) (model.Team, error)
 	GetTeams(ctx context.Context) ([]model.Team, error)
 	DeleteTeam(ctx context.Context, id string) error
+	AddPlayerToTeam(ctx context.Context, teamID, playerID string) error
 }
 
 func GetHandler(s Store) httpwrap.Handler {
@@ -49,6 +50,48 @@ func EditTeamHandler(s Store) httpwrap.Handler {
 		}
 
 		return req.Render(ctx, EditTeam(ps, team))
+	}
+}
+
+func TeamListHandler(s Store) httpwrap.Handler {
+	return func(ctx context.Context, req httpwrap.Request) error {
+		teams, err := s.GetTeams(ctx)
+		if err != nil {
+			return err
+		}
+
+		return req.Render(ctx, teamList(teams))
+	}
+}
+
+func AddPlayerToTeamHandler(s Store) httpwrap.Handler {
+	return func(ctx context.Context, req httpwrap.Request) error {
+		var data struct {
+			TeamID   string `req:"path:teamID,required"`
+			PlayerID string `req:"path:playerID,required"`
+		}
+
+		err := req.Unmarshal(&data)
+		if err != nil {
+			return err
+		}
+
+		err = s.AddPlayerToTeam(ctx, data.TeamID, data.PlayerID)
+		if err != nil {
+			return err
+		}
+
+		team, err := s.GetTeam(ctx, data.TeamID)
+		if err != nil {
+			return err
+		}
+
+		ps, err := s.GetPlayers(ctx, players.WithoutTeam())
+		if err != nil {
+			return err
+		}
+
+		return req.Render(ctx, editTeamModal(ps, team, true))
 	}
 }
 

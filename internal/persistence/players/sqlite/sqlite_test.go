@@ -8,6 +8,7 @@ import (
 	"github.com/cszczepaniak/go-htmx/internal/admin/players/model"
 	"github.com/cszczepaniak/go-htmx/internal/persistence/players"
 	isql "github.com/cszczepaniak/go-htmx/internal/sql"
+	"github.com/google/uuid"
 	"github.com/shoenig/test"
 	"github.com/shoenig/test/must"
 )
@@ -77,6 +78,29 @@ func (p playerServiceTester) getPlayers(t testing.TB) map[string]model.Player {
 	byID := make(map[string]model.Player)
 	for _, player := range players {
 		byID[player.ID] = player
+	}
+
+	return byID
+}
+
+func (p playerServiceTester) getTeam(t testing.TB, id string) model.Team {
+	t.Helper()
+
+	team, err := p.GetTeam(context.Background(), id)
+	must.NoError(t, err)
+
+	return team
+}
+
+func (p playerServiceTester) getTeams(t testing.TB) map[string]model.Team {
+	t.Helper()
+
+	teams, err := p.GetTeams(context.Background())
+	must.NoError(t, err)
+
+	byID := make(map[string]model.Team)
+	for _, team := range teams {
+		byID[team.ID] = team
 	}
 
 	return byID
@@ -262,4 +286,38 @@ func TestTeams(t *testing.T) {
 
 	must.MapContainsKey(t, teamsByID, team3.ID)
 	test.Eq(t, team3, teamsByID[team3.ID])
+}
+
+func TestDeletePlayerFromTeam(t *testing.T) {
+	p := newPlayerServiceTester(t)
+	ctx := context.Background()
+
+	player := p.seedPlayer(t)
+	team := p.seedTeam(t)
+
+	p.addPlayerToTeam(t, player, team)
+
+	// Deleting a player from a random team should error.
+	err := p.DeletePlayerFromTeam(ctx, uuid.NewString(), player.ID)
+	test.ErrorIs(t, err, isql.ErrNoRowsAffected)
+
+	// Deleting a random player from a team should error.
+	err = p.DeletePlayerFromTeam(ctx, team.ID, uuid.NewString())
+	test.ErrorIs(t, err, isql.ErrNoRowsAffected)
+
+	// Validate that our player is on our team.
+	team = p.getTeam(t, team.ID)
+	must.Eq(t, player.ID, team.Player1.ID)
+
+	player = p.getPlayer(t, player.ID)
+	must.Eq(t, team.ID, player.TeamID)
+
+	err = p.DeletePlayerFromTeam(ctx, team.ID, player.ID)
+	must.NoError(t, err)
+
+	team = p.getTeam(t, team.ID)
+	test.Eq(t, "", team.Player1.ID)
+
+	player = p.getPlayer(t, player.ID)
+	test.Eq(t, "", player.TeamID)
 }

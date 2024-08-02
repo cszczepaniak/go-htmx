@@ -194,6 +194,15 @@ func (p persistence) AddPlayerToTeam(ctx context.Context, teamID, playerID strin
 	return tx.Commit()
 }
 
+func (p persistence) DeletePlayerFromTeam(ctx context.Context, teamID, playerID string) error {
+	return isql.MustExecOne(
+		ctx,
+		p.db,
+		`UPDATE Players SET TeamID = NULL WHERE ID = ? AND TeamID = ?`,
+		playerID, teamID,
+	)
+}
+
 func (p persistence) GetTeam(ctx context.Context, id string) (model.Team, error) {
 	t := model.Team{
 		ID: id,

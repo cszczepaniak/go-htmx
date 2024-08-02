@@ -68,14 +68,18 @@ func (p persistence) GetPlayer(ctx context.Context, id string) (model.Player, er
 		ID: id,
 	}
 
+	var teamID sql.NullString
 	err := p.db.QueryRowContext(
 		ctx,
-		`SELECT FirstName, LastName FROM Players WHERE ID = ?`,
+		`SELECT FirstName, LastName, TeamID FROM Players WHERE ID = ?`,
 		id,
-	).Scan(&player.FirstName, &player.LastName)
+	).Scan(&player.FirstName, &player.LastName, &teamID)
 	if err != nil {
 		return model.Player{}, err
 	}
+
+	// If teamID is null, teamID.String will be empty (which is fine)
+	player.TeamID = teamID.String
 
 	return player, nil
 }

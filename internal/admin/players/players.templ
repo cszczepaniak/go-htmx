@@ -45,7 +45,7 @@ templ newPlayerForm() {
 }
 
 templ playerList(players []model.Player) {
-	<ul id="player-list" class="space-y-2" hx-swap="outerHTML">
+	<ul id="player-list" class="space-y-2 max-h-96 overflow-y-auto" hx-swap="outerHTML">
 		for _, p := range players {
 			<li class="flex flex-row justify-between">
 				<span class="text-md">{ p.FirstName } { p.LastName }</span>

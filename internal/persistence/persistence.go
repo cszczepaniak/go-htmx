@@ -21,6 +21,7 @@ type PlayerStore interface {
 
 	InsertTeam(ctx context.Context) (model.Team, error)
 	AddPlayerToTeam(ctx context.Context, teamID, playerID string) error
+	DeletePlayerFromTeam(ctx context.Context, teamID, playerID string) error
 	GetTeam(ctx context.Context, id string) (model.Team, error)
 	GetTeams(ctx context.Context) ([]model.Team, error)
 	DeleteTeam(ctx context.Context, id string) error

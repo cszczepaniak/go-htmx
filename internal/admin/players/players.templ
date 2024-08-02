@@ -16,8 +16,15 @@ templ Players(players []model.Player) {
 			<hr/>
 			@newPlayerForm()
 			<hr/>
-			<h2 class="font-medium text-lg">All Players</h2>
-			@playerList(players)
+			<div class="flex flex-col space-y-4">
+				<h2 class="font-medium text-lg">All Players</h2>
+				<input
+					_="on keyup show <li/> in #player-list when its textContent contains my value"
+					class="border rounded-md px-3 py-1 text-sm shadow-sm h-9"
+					placeholder="Filter players..."
+				/>
+				@playerList(players)
+			</div>
 		</div>
 	}
 }

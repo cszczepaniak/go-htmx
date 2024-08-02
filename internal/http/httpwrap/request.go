@@ -17,6 +17,10 @@ type Request struct {
 	response http.ResponseWriter
 }
 
+func (r Request) HXTrigger(name string) {
+	r.response.Header().Add("HX-Trigger", name)
+}
+
 func (r Request) Render(ctx context.Context, c templ.Component) error {
 	return c.Render(ctx, r.response)
 }

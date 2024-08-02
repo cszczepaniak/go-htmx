@@ -29,7 +29,13 @@ templ EditTeam(ps []model.Player, team model.Team) {
 }
 
 templ teamList(teams []model.Team) {
-	<ul id="team-list" class="space-y-2" hx-swap="outerHTML">
+	<ul
+		id="team-list"
+		hx-get="/admin/teams/list"
+		hx-trigger="teams-damaged from:body"
+		class="space-y-2"
+		hx-swap="outerHTML"
+	>
 		for _, t := range teams {
 			<li class="flex flex-row justify-between">
 				<span class="text-md">{ t.Name() }</span>
@@ -96,38 +102,33 @@ templ editTeamModal(ps []model.Player, team model.Team, open bool) {
 }
 
 templ editTeamPlayerList(teamID string, ps []model.Player) {
-	<ul id="player-list" class="flex flex-col space-y-2 max-h-96 overflow-y-auto">
+	<ul
+		id="player-list"
+		hx-get={ fmt.Sprintf("/admin/teams/availableplayers?teamID=%s", teamID) }
+		hx-trigger="players-damaged from:body"
+		hx-swap="outerHTML"
+		class="flex flex-col space-y-2 max-h-96 overflow-y-auto pr-1"
+	>
 		for _, p := range ps {
 			<li class="flex flex-row justify-between">
 				<p>{ p.Name() }</p>
-				<button id={ fmt.Sprintf("add-player-%s", p.ID) } class="text-green-500">
+				<button
+					hx-post={ fmt.Sprintf("/admin/teams/%s/player/%s", teamID, p.ID) }
+					hx-target="#team-details"
+					hx-swap="outerHTML"
+					class="text-green-500"
+				>
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
 					</svg>
 				</button>
-				// These hidden divs exist only so we can trigger multiple requests from the
-				// button's click.
-				<div
-					class="hidden"
-					hx-trigger={ fmt.Sprintf("click from:#add-player-%s", p.ID) }
-					hx-post={ fmt.Sprintf("/admin/teams/%s/player/%s", teamID, p.ID) }
-					hx-target="#edit-team-modal"
-					hx-swap="outerHTML"
-				></div>
-				<div
-					class="hidden"
-					hx-trigger={ fmt.Sprintf("click from:#add-player-%s", p.ID) }
-					hx-get="/admin/teams/list"
-					hx-target="#team-list"
-					hx-swap="outerHTML"
-				></div>
 			</li>
 		}
 	</ul>
 }
 
 templ teamDetails(team model.Team) {
-	<div>
+	<div id="team-details" class="space-y-1">
 		if team.Player1.ID == "" {
 			<p class="italic text-gray-600 text-sm">
 				This team needs 2 more players. Add players by selecting from the list
@@ -138,10 +139,43 @@ templ teamDetails(team model.Team) {
 				This team needs 1 more player. Add players by selecting from the list
 				below.
 			</p>
-			<p>Player 1: { team.Player1.Name() }</p>
+			<div class="flex flex-row justify-between">
+				<p>Player 1: { team.Player1.Name() }</p>
+				<button
+					id="delete-player"
+					hx-delete={ fmt.Sprintf("/admin/teams/%s/player/%s", team.ID, team.Player1.ID) }
+					hx-target="#team-details"
+					hx-swap="outerHTML"
+					class="text-red-700"
+				>
+					@deleteIcon()
+				</button>
+			</div>
 		} else {
-			<p>Player 1: { team.Player1.Name() }</p>
-			<p>Player 2: { team.Player2.Name() }</p>
+			<div class="flex flex-row justify-between">
+				<p>Player 1: { team.Player1.Name() }</p>
+				<button
+					id="delete-player"
+					hx-delete={ fmt.Sprintf("/admin/teams/%s/player/%s", team.ID, team.Player1.ID) }
+					hx-target="#team-details"
+					hx-swap="outerHTML"
+					class="text-red-700"
+				>
+					@deleteIcon()
+				</button>
+			</div>
+			<div class="flex flex-row justify-between">
+				<p>Player 2: { team.Player2.Name() }</p>
+				<button
+					id="delete-player"
+					hx-delete={ fmt.Sprintf("/admin/teams/%s/player/%s", team.ID, team.Player2.ID) }
+					hx-target="#team-details"
+					hx-swap="outerHTML"
+					class="text-red-700"
+				>
+					@deleteIcon()
+				</button>
+			</div>
 		}
 	</div>
 }

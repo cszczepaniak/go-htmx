@@ -69,8 +69,18 @@ func Setup(static fs.FS, p persistence.Persistence) http.Handler {
 	)
 	httpwrap.Handle(
 		m,
+		"GET /admin/teams/availableplayers",
+		teams.AvailablePlayersHandler(p.PlayerStore),
+	)
+	httpwrap.Handle(
+		m,
 		"POST /admin/teams/{teamID}/player/{playerID}",
 		teams.AddPlayerToTeamHandler(p.PlayerStore),
+	)
+	httpwrap.Handle(
+		m,
+		"DELETE /admin/teams/{teamID}/player/{playerID}",
+		teams.DeletePlayerFromTeamHandler(p.PlayerStore),
 	)
 	httpwrap.Handle(
 		m,

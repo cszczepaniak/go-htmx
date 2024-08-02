@@ -15,6 +15,7 @@ type Store interface {
 	GetTeams(ctx context.Context) ([]model.Team, error)
 	DeleteTeam(ctx context.Context, id string) error
 	AddPlayerToTeam(ctx context.Context, teamID, playerID string) error
+	DeletePlayerFromTeam(ctx context.Context, teamID, playerID string) error
 }
 
 func GetHandler(s Store) httpwrap.Handler {
@@ -86,12 +87,59 @@ func AddPlayerToTeamHandler(s Store) httpwrap.Handler {
 			return err
 		}
 
+		req.HXTrigger("teams-damaged")
+		req.HXTrigger("players-damaged")
+
+		return req.Render(ctx, teamDetails(team))
+	}
+}
+
+func DeletePlayerFromTeamHandler(s Store) httpwrap.Handler {
+	return func(ctx context.Context, req httpwrap.Request) error {
+		var data struct {
+			TeamID   string `req:"path:teamID,required"`
+			PlayerID string `req:"path:playerID,required"`
+		}
+
+		err := req.Unmarshal(&data)
+		if err != nil {
+			return err
+		}
+
+		err = s.DeletePlayerFromTeam(ctx, data.TeamID, data.PlayerID)
+		if err != nil {
+			return err
+		}
+
+		team, err := s.GetTeam(ctx, data.TeamID)
+		if err != nil {
+			return err
+		}
+
+		req.HXTrigger("teams-damaged")
+		req.HXTrigger("players-damaged")
+
+		return req.Render(ctx, teamDetails(team))
+	}
+}
+
+func AvailablePlayersHandler(s Store) httpwrap.Handler {
+	return func(ctx context.Context, req httpwrap.Request) error {
+		var data struct {
+			TeamID string `req:"query:teamID,required"`
+		}
+
+		err := req.Unmarshal(&data)
+		if err != nil {
+			return err
+		}
+
 		ps, err := s.GetPlayers(ctx, players.WithoutTeam())
 		if err != nil {
 			return err
 		}
 
-		return req.Render(ctx, editTeamModal(ps, team, true))
+		return req.Render(ctx, editTeamPlayerList(data.TeamID, ps))
 	}
 }
 

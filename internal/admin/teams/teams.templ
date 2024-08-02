@@ -71,9 +71,13 @@ templ editTeamModal(ps []model.Player, team model.Team, open bool) {
 						<hr/>
 					</div>
 					@teamDetails(team)
-					<div>
+					<div class="flex flex-col">
 						<p class="font-medium mb-2">Player List</p>
-						<hr/>
+						<input
+							_="on keyup show <li/> in #player-list when its textContent contains my value"
+							class="border rounded-md px-3 py-1 text-sm shadow-sm h-9"
+							placeholder="Filter players..."
+						/>
 					</div>
 					@editTeamPlayerList(team.ID, ps)
 				</div>
@@ -94,9 +98,9 @@ templ editTeamModal(ps []model.Player, team model.Team, open bool) {
 templ editTeamPlayerList(teamID string, ps []model.Player) {
 	<ul id="player-list" class="flex flex-col space-y-2 max-h-96 overflow-y-auto">
 		for _, p := range ps {
-			<div class="flex flex-row justify-between">
-				<li>{ p.Name() }</li>
-				<button id={ fmt.Sprintf("add-player-%s", p.ID) } class="pr-2 text-green-500">
+			<li class="flex flex-row justify-between">
+				<p>{ p.Name() }</p>
+				<button id={ fmt.Sprintf("add-player-%s", p.ID) } class="text-green-500">
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
 					</svg>
@@ -117,7 +121,7 @@ templ editTeamPlayerList(teamID string, ps []model.Player) {
 					hx-target="#team-list"
 					hx-swap="outerHTML"
 				></div>
-			</div>
+			</li>
 		}
 	</ul>
 }

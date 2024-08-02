@@ -28,7 +28,7 @@ func Base(currRoute string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><script src=\"https://unpkg.com/htmx.org@2.0.1\"></script><script src=\"https://unpkg.com/htmx-ext-sse@2.2.1/sse.js\"></script><link rel=\"stylesheet\" href=\"/web/dist/styles.css\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"></head><body><nav class=\"py-2 px-4 bg-blue-500 flex flex-row\"><div class=\"flex flex-row items-center space-x-4\"><span class=\"text-3xl text-white mr-4\">Cribbly</span> ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><script src=\"https://unpkg.com/htmx.org@2.0.1\"></script><script src=\"https://unpkg.com/htmx-ext-sse@2.2.1/sse.js\"></script><script src=\"https://unpkg.com/hyperscript.org@0.9.12\"></script><link rel=\"stylesheet\" href=\"/web/dist/styles.css\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"></head><body><nav class=\"py-2 px-4 bg-blue-500 flex flex-row\"><div class=\"flex flex-row items-center space-x-4\"><span class=\"text-3xl text-white mr-4\">Cribbly</span> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -67,7 +67,7 @@ func Base(currRoute string) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(n.name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/shell.templ`, Line: 21, Col: 15}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/shell.templ`, Line: 22, Col: 15}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {

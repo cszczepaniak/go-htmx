@@ -8,9 +8,9 @@ import (
 	"github.com/cszczepaniak/go-htmx/internal/persistence/players"
 )
 
-func GetHandler(s persistence.PlayerStore) httpwrap.Handler {
+func GetHandler(s persistence.Store) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
-		teams, err := s.GetTeams(ctx)
+		teams, err := s.PlayerStore.GetTeams(ctx)
 		if err != nil {
 			return err
 		}
@@ -19,7 +19,7 @@ func GetHandler(s persistence.PlayerStore) httpwrap.Handler {
 	}
 }
 
-func EditTeamHandler(s persistence.PlayerStore) httpwrap.Handler {
+func EditTeamHandler(s persistence.Store) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		var data struct {
 			ID string `req:"path:id,required"`
@@ -30,12 +30,12 @@ func EditTeamHandler(s persistence.PlayerStore) httpwrap.Handler {
 			return err
 		}
 
-		ps, err := s.GetPlayers(ctx, players.WithoutTeam())
+		ps, err := s.PlayerStore.GetPlayers(ctx, players.WithoutTeam())
 		if err != nil {
 			return err
 		}
 
-		team, err := s.GetTeam(ctx, data.ID)
+		team, err := s.PlayerStore.GetTeam(ctx, data.ID)
 		if err != nil {
 			return err
 		}
@@ -44,9 +44,9 @@ func EditTeamHandler(s persistence.PlayerStore) httpwrap.Handler {
 	}
 }
 
-func TeamListHandler(s persistence.PlayerStore) httpwrap.Handler {
+func TeamListHandler(s persistence.Store) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
-		teams, err := s.GetTeams(ctx)
+		teams, err := s.PlayerStore.GetTeams(ctx)
 		if err != nil {
 			return err
 		}
@@ -55,7 +55,7 @@ func TeamListHandler(s persistence.PlayerStore) httpwrap.Handler {
 	}
 }
 
-func AddPlayerToTeamHandler(s persistence.PlayerStore) httpwrap.Handler {
+func AddPlayerToTeamHandler(s persistence.Store) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		var data struct {
 			TeamID   string `req:"path:teamID,required"`
@@ -67,12 +67,12 @@ func AddPlayerToTeamHandler(s persistence.PlayerStore) httpwrap.Handler {
 			return err
 		}
 
-		err = s.AddPlayerToTeam(ctx, data.TeamID, data.PlayerID)
+		err = s.PlayerStore.AddPlayerToTeam(ctx, data.TeamID, data.PlayerID)
 		if err != nil {
 			return err
 		}
 
-		team, err := s.GetTeam(ctx, data.TeamID)
+		team, err := s.PlayerStore.GetTeam(ctx, data.TeamID)
 		if err != nil {
 			return err
 		}
@@ -84,7 +84,7 @@ func AddPlayerToTeamHandler(s persistence.PlayerStore) httpwrap.Handler {
 	}
 }
 
-func DeletePlayerFromTeamHandler(s persistence.PlayerStore) httpwrap.Handler {
+func DeletePlayerFromTeamHandler(s persistence.Store) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		var data struct {
 			TeamID   string `req:"path:teamID,required"`
@@ -96,12 +96,12 @@ func DeletePlayerFromTeamHandler(s persistence.PlayerStore) httpwrap.Handler {
 			return err
 		}
 
-		err = s.DeletePlayerFromTeam(ctx, data.TeamID, data.PlayerID)
+		err = s.PlayerStore.DeletePlayerFromTeam(ctx, data.TeamID, data.PlayerID)
 		if err != nil {
 			return err
 		}
 
-		team, err := s.GetTeam(ctx, data.TeamID)
+		team, err := s.PlayerStore.GetTeam(ctx, data.TeamID)
 		if err != nil {
 			return err
 		}
@@ -113,7 +113,7 @@ func DeletePlayerFromTeamHandler(s persistence.PlayerStore) httpwrap.Handler {
 	}
 }
 
-func AvailablePlayersHandler(s persistence.PlayerStore) httpwrap.Handler {
+func AvailablePlayersHandler(s persistence.Store) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		var data struct {
 			TeamID string `req:"query:teamID,required"`
@@ -124,7 +124,7 @@ func AvailablePlayersHandler(s persistence.PlayerStore) httpwrap.Handler {
 			return err
 		}
 
-		ps, err := s.GetPlayers(ctx, players.WithoutTeam())
+		ps, err := s.PlayerStore.GetPlayers(ctx, players.WithoutTeam())
 		if err != nil {
 			return err
 		}
@@ -133,14 +133,14 @@ func AvailablePlayersHandler(s persistence.PlayerStore) httpwrap.Handler {
 	}
 }
 
-func PostHandler(s persistence.PlayerStore) httpwrap.Handler {
+func PostHandler(s persistence.Store) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
-		_, err := s.InsertTeam(ctx)
+		_, err := s.PlayerStore.InsertTeam(ctx)
 		if err != nil {
 			return err
 		}
 
-		teams, err := s.GetTeams(ctx)
+		teams, err := s.PlayerStore.GetTeams(ctx)
 		if err != nil {
 			return err
 		}
@@ -149,7 +149,7 @@ func PostHandler(s persistence.PlayerStore) httpwrap.Handler {
 	}
 }
 
-func DeleteHandler(s persistence.PlayerStore) httpwrap.Handler {
+func DeleteHandler(s persistence.Store) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		var data struct {
 			ID string `req:"path:id,required"`
@@ -160,12 +160,12 @@ func DeleteHandler(s persistence.PlayerStore) httpwrap.Handler {
 			return err
 		}
 
-		err = s.DeleteTeam(ctx, data.ID)
+		err = s.PlayerStore.DeleteTeam(ctx, data.ID)
 		if err != nil {
 			return err
 		}
 
-		teams, err := s.GetTeams(ctx)
+		teams, err := s.PlayerStore.GetTeams(ctx)
 		if err != nil {
 			return err
 		}

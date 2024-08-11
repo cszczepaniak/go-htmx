@@ -12,9 +12,10 @@ func (p Player) Name() string {
 }
 
 type Team struct {
-	ID      string
-	Player1 Player
-	Player2 Player
+	ID         string
+	Player1    Player
+	Player2    Player
+	DivisionID string
 }
 
 func (t Team) Name() string {

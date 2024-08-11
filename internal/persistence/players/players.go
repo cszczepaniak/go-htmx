@@ -12,3 +12,25 @@ func WithoutTeam() GetPlayerOpt {
 		return gpo
 	}
 }
+
+type GetTeamOpts struct {
+	WithoutDivision bool
+	DivisionID      string
+}
+
+type GetTeamOpt func(GetTeamOpts) GetTeamOpts
+
+func WithoutDivision() GetTeamOpt {
+	return func(gpo GetTeamOpts) GetTeamOpts {
+		gpo.WithoutDivision = true
+		return gpo
+	}
+}
+
+func InDivision(id string) GetTeamOpt {
+	return func(gpo GetTeamOpts) GetTeamOpts {
+		gpo.WithoutDivision = false
+		gpo.DivisionID = id
+		return gpo
+	}
+}

@@ -38,7 +38,8 @@ func (p persistence) Init(ctx context.Context) error {
 	_, err = p.db.ExecContext(
 		ctx,
 		`CREATE TABLE IF NOT EXISTS Teams (
-			ID VARCHAR(255) PRIMARY KEY
+			ID VARCHAR(255) PRIMARY KEY,
+			DivisionID VARCHAR(255)
 		)`,
 	)
 	return err
@@ -270,13 +271,31 @@ func (p persistence) GetTeam(ctx context.Context, id string) (model.Team, error)
 	return t, nil
 }
 
-func (p persistence) GetTeams(ctx context.Context) ([]model.Team, error) {
+func (p persistence) GetTeams(ctx context.Context, opts ...players.GetTeamOpt) ([]model.Team, error) {
+	var o players.GetTeamOpts
+	for _, opt := range opts {
+		o = opt(o)
+	}
+
+	var args []any
+
+	q := `SELECT t.ID, p.ID, p.FirstName, p.LastName
+			FROM Teams t 
+			LEFT JOIN Players p ON t.ID = p.TeamID`
+
+	if o.WithoutDivision {
+		q += ` WHERE t.DivisionID IS NULL`
+	} else if o.DivisionID != "" {
+		q += ` WHERE t.DivisionID = ?`
+		args = []any{o.DivisionID}
+	}
+
+	q += ` ORDER BY t.ID ASC, p.LastName ASC, p.FirstName ASC`
+
 	rows, err := p.db.QueryContext(
 		ctx,
-		`SELECT t.ID, p.ID, p.FirstName, p.LastName
-			FROM Teams t 
-			LEFT JOIN Players p ON t.ID = p.TeamID
-		ORDER BY t.ID ASC, p.LastName ASC, p.FirstName ASC`,
+		q,
+		args...,
 	)
 	if err != nil {
 		return nil, err
@@ -335,4 +354,24 @@ func (p persistence) GetTeams(ctx context.Context) ([]model.Team, error) {
 
 func (p persistence) DeleteTeam(ctx context.Context, id string) error {
 	return isql.MustExecOne(ctx, p.db, `DELETE FROM Teams WHERE ID = ?`, id)
+}
+
+func (p persistence) AddTeamToDivision(ctx context.Context, teamID, divisionID string) error {
+	return isql.MustExecOne(
+		ctx,
+		p.db,
+		`UPDATE Teams SET DivisionID = ? WHERE ID = ? AND DivisionID IS NULL`,
+		divisionID,
+		teamID,
+	)
+}
+
+func (p persistence) DeleteTeamFromDivision(ctx context.Context, teamID, divisionID string) error {
+	return isql.MustExecOne(
+		ctx,
+		p.db,
+		`UPDATE Teams SET DivisionID = NULL WHERE ID = ? AND DivisionID = ?`,
+		teamID,
+		divisionID,
+	)
 }

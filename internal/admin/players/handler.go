@@ -7,9 +7,9 @@ import (
 	"github.com/cszczepaniak/go-htmx/internal/persistence"
 )
 
-func GetHandler(s persistence.PlayerStore) httpwrap.Handler {
+func GetHandler(s persistence.Store) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
-		ps, err := s.GetPlayers(ctx)
+		ps, err := s.PlayerStore.GetPlayers(ctx)
 		if err != nil {
 			return err
 		}
@@ -18,7 +18,7 @@ func GetHandler(s persistence.PlayerStore) httpwrap.Handler {
 	}
 }
 
-func PostHandler(s persistence.PlayerStore) httpwrap.Handler {
+func PostHandler(s persistence.Store) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		var data struct {
 			FirstName string `req:"form:firstName,required"`
@@ -30,12 +30,12 @@ func PostHandler(s persistence.PlayerStore) httpwrap.Handler {
 			return err
 		}
 
-		_, err = s.InsertPlayer(ctx, data.FirstName, data.LastName)
+		_, err = s.PlayerStore.InsertPlayer(ctx, data.FirstName, data.LastName)
 		if err != nil {
 			return err
 		}
 
-		ps, err := s.GetPlayers(ctx)
+		ps, err := s.PlayerStore.GetPlayers(ctx)
 		if err != nil {
 			return err
 		}
@@ -44,7 +44,7 @@ func PostHandler(s persistence.PlayerStore) httpwrap.Handler {
 	}
 }
 
-func DeleteHandler(s persistence.PlayerStore) httpwrap.Handler {
+func DeleteHandler(s persistence.Store) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		var data struct {
 			ID string `req:"path:id,required"`
@@ -55,12 +55,12 @@ func DeleteHandler(s persistence.PlayerStore) httpwrap.Handler {
 			return err
 		}
 
-		err = s.DeletePlayer(ctx, data.ID)
+		err = s.PlayerStore.DeletePlayer(ctx, data.ID)
 		if err != nil {
 			return err
 		}
 
-		ps, err := s.GetPlayers(ctx)
+		ps, err := s.PlayerStore.GetPlayers(ctx)
 		if err != nil {
 			return err
 		}

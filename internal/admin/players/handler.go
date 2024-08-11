@@ -3,18 +3,11 @@ package players
 import (
 	"context"
 
-	"github.com/cszczepaniak/go-htmx/internal/admin/players/model"
 	"github.com/cszczepaniak/go-htmx/internal/http/httpwrap"
-	"github.com/cszczepaniak/go-htmx/internal/persistence/players"
+	"github.com/cszczepaniak/go-htmx/internal/persistence"
 )
 
-type Store interface {
-	InsertPlayer(ctx context.Context, firstName, lastName string) (model.Player, error)
-	GetPlayers(ctx context.Context, opts ...players.GetPlayerOpt) ([]model.Player, error)
-	DeletePlayer(ctx context.Context, id string) error
-}
-
-func GetHandler(s Store) httpwrap.Handler {
+func GetHandler(s persistence.PlayerStore) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		ps, err := s.GetPlayers(ctx)
 		if err != nil {
@@ -25,7 +18,7 @@ func GetHandler(s Store) httpwrap.Handler {
 	}
 }
 
-func PostHandler(s Store) httpwrap.Handler {
+func PostHandler(s persistence.PlayerStore) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		var data struct {
 			FirstName string `req:"form:firstName,required"`
@@ -51,7 +44,7 @@ func PostHandler(s Store) httpwrap.Handler {
 	}
 }
 
-func DeleteHandler(s Store) httpwrap.Handler {
+func DeleteHandler(s persistence.PlayerStore) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		var data struct {
 			ID string `req:"path:id,required"`

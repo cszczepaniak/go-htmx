@@ -3,22 +3,12 @@ package teams
 import (
 	"context"
 
-	"github.com/cszczepaniak/go-htmx/internal/admin/players/model"
 	"github.com/cszczepaniak/go-htmx/internal/http/httpwrap"
+	"github.com/cszczepaniak/go-htmx/internal/persistence"
 	"github.com/cszczepaniak/go-htmx/internal/persistence/players"
 )
 
-type Store interface {
-	GetPlayers(ctx context.Context, opts ...players.GetPlayerOpt) ([]model.Player, error)
-	InsertTeam(ctx context.Context) (model.Team, error)
-	GetTeam(ctx context.Context, id string) (model.Team, error)
-	GetTeams(ctx context.Context) ([]model.Team, error)
-	DeleteTeam(ctx context.Context, id string) error
-	AddPlayerToTeam(ctx context.Context, teamID, playerID string) error
-	DeletePlayerFromTeam(ctx context.Context, teamID, playerID string) error
-}
-
-func GetHandler(s Store) httpwrap.Handler {
+func GetHandler(s persistence.PlayerStore) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		teams, err := s.GetTeams(ctx)
 		if err != nil {
@@ -29,7 +19,7 @@ func GetHandler(s Store) httpwrap.Handler {
 	}
 }
 
-func EditTeamHandler(s Store) httpwrap.Handler {
+func EditTeamHandler(s persistence.PlayerStore) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		var data struct {
 			ID string `req:"path:id,required"`
@@ -54,7 +44,7 @@ func EditTeamHandler(s Store) httpwrap.Handler {
 	}
 }
 
-func TeamListHandler(s Store) httpwrap.Handler {
+func TeamListHandler(s persistence.PlayerStore) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		teams, err := s.GetTeams(ctx)
 		if err != nil {
@@ -65,7 +55,7 @@ func TeamListHandler(s Store) httpwrap.Handler {
 	}
 }
 
-func AddPlayerToTeamHandler(s Store) httpwrap.Handler {
+func AddPlayerToTeamHandler(s persistence.PlayerStore) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		var data struct {
 			TeamID   string `req:"path:teamID,required"`
@@ -94,7 +84,7 @@ func AddPlayerToTeamHandler(s Store) httpwrap.Handler {
 	}
 }
 
-func DeletePlayerFromTeamHandler(s Store) httpwrap.Handler {
+func DeletePlayerFromTeamHandler(s persistence.PlayerStore) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		var data struct {
 			TeamID   string `req:"path:teamID,required"`
@@ -123,7 +113,7 @@ func DeletePlayerFromTeamHandler(s Store) httpwrap.Handler {
 	}
 }
 
-func AvailablePlayersHandler(s Store) httpwrap.Handler {
+func AvailablePlayersHandler(s persistence.PlayerStore) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		var data struct {
 			TeamID string `req:"query:teamID,required"`
@@ -143,7 +133,7 @@ func AvailablePlayersHandler(s Store) httpwrap.Handler {
 	}
 }
 
-func PostHandler(s Store) httpwrap.Handler {
+func PostHandler(s persistence.PlayerStore) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		_, err := s.InsertTeam(ctx)
 		if err != nil {
@@ -159,7 +149,7 @@ func PostHandler(s Store) httpwrap.Handler {
 	}
 }
 
-func DeleteHandler(s Store) httpwrap.Handler {
+func DeleteHandler(s persistence.PlayerStore) httpwrap.Handler {
 	return func(ctx context.Context, req httpwrap.Request) error {
 		var data struct {
 			ID string `req:"path:id,required"`
